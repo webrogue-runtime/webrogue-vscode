@@ -1,2 +1,4 @@
 /node_modules
+/src/wrapp_editor/node_modules
 /dist
+/webrogue-vscode-*.vsix

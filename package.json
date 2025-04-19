@@ -3,6 +3,9 @@
   "displayName": "Webrogue",
   "description": "Webrogue support for Visual Studio Code",
   "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/webrogue-runtime/webrogue-vscode.git"
+  },
   "engines": {
     "vscode": "^1.99.0"
   },
@@ -26,6 +29,10 @@
       {
         "command": "webrogue-vscode.getWebrogueBinPath",
         "title": "Copy path to Webrogue binary"
+      },
+      {
+        "command": "webrogue-vscode.pack",
+        "title": "Pack Webrogue configuration into WRAPP"
       }
     ],
     "taskDefinitions": [
@@ -37,9 +44,21 @@
         "properties": {
           "config": {
             "type": "string",
-            "description": "Path to webrogue.json file or directory containing this file"
+            "description": "Pack Webrogue configuration into WRAPP"
           }
         }
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "webrogue.wrapp",
+        "displayName": "WRAPP",
+        "selector": [
+          {
+            "filenamePattern": "*.wrapp"
+          }
+        ],
+        "priority": "default"
       }
     ]
   },

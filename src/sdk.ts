@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as tar from 'tar';
 import * as cmake from './cmake';
 import * as jszip from 'jszip';
+import * as childProcess from 'child_process';
 
 function assumeSDKInfo(context: vscode.ExtensionContext): {
     sdkName: string,
@@ -54,7 +55,38 @@ export interface SDKInfo {
     p1ToolchainFile: vscode.Uri
 }
 
-export async function getSDK(context: vscode.ExtensionContext): Promise<SDKInfo | undefined> {
+export class ValidSDKInfo implements SDKInfo {
+    constructor(readonly webrogueBin: vscode.Uri, readonly p1ToolchainFile: vscode.Uri) { }
+
+    async run(args: string[]) {
+        await new Promise<void>((resolve, reject) => {
+            childProcess.execFile(this.webrogueBin.fsPath, args, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    async runManaged(title: string, args: string[]) {
+        try {
+            await vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: title
+                },
+                async (_) => { await this.run(args); }
+            );
+        } catch (e) {
+            vscode.window.showErrorMessage(`${e}`);
+        }
+    }
+}
+
+
+export async function getSDK(context: vscode.ExtensionContext): Promise<ValidSDKInfo | undefined> {
     let sdkInfo = assumeSDKInfo(context);
     try {
         await vscode.workspace.fs.stat(sdkInfo.webrogueBin);
@@ -66,10 +98,7 @@ export async function getSDK(context: vscode.ExtensionContext): Promise<SDKInfo 
     } catch {
         return;
     }
-    return {
-        webrogueBin: sdkInfo.webrogueBin,
-        p1ToolchainFile: sdkInfo.p1ToolchainFile
-    };
+    return new ValidSDKInfo(sdkInfo.webrogueBin, sdkInfo.p1ToolchainFile);
 }
 
 export async function installSDK(context: vscode.ExtensionContext) {
@@ -202,7 +231,7 @@ export async function installSDK(context: vscode.ExtensionContext) {
     });
 }
 
-export async function ensureSDK(context: vscode.ExtensionContext): Promise<SDKInfo | undefined> {
+export async function ensureSDK(context: vscode.ExtensionContext): Promise<ValidSDKInfo | undefined> {
     let sdk = await getSDK(context);
     if (sdk) {
         return sdk;

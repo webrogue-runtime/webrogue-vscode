@@ -2,6 +2,13 @@
 import * as vscode from 'vscode';
 import * as sdk from './sdk';
 
+function getWatchedCmakeKitsPath(api: any): string | undefined {
+    let watched: object = api.manager.kitsWatcher.getWatched();
+    let dirs = Object.keys(watched).filter(path => path.endsWith("CMakeTools"));
+    if (dirs.length !== 1) { return; }
+    return vscode.Uri.joinPath(vscode.Uri.file(dirs[0]), "cmake-tools-kits.json").fsPath;
+}
+
 export async function checkCmakeExtension(context: vscode.ExtensionContext) {
     let cmake_extension = vscode.extensions.getExtension("ms-vscode.cmake-tools");
     if (cmake_extension) {
@@ -17,13 +24,16 @@ export async function checkCmakeExtension(context: vscode.ExtensionContext) {
         if (!cmakeKitsPath) {
             let exports = await cmake_extension.activate();
             let api = exports.getApi(2);
-            let watched: object = api.manager.kitsWatcher.getWatched();
-            let dirs = Object.keys(watched);
-            if (dirs.length !== 1) { return; }
-            let filenames: [string] = Object.values(watched)[0];
-            if (filenames.length !== 1) { return; }
-            cmakeKitsPath = vscode.Uri.joinPath(vscode.Uri.file(dirs[0]), filenames[0]).fsPath;
-            await context.globalState.update("cmakeKitsPath", cmakeKitsPath);
+            cmakeKitsPath = getWatchedCmakeKitsPath(api);
+            if (cmakeKitsPath) {
+                await context.globalState.update("cmakeKitsPath", cmakeKitsPath);
+            } else {
+                await vscode.commands.executeCommand("cmake.scanForKits");
+                cmakeKitsPath = getWatchedCmakeKitsPath(api);
+                if (!cmakeKitsPath) {
+                    return;
+                }
+            }
         }
         let kitsContent: { name: string, toolchainFile?: string }[] = [];
         let dirty = false;
