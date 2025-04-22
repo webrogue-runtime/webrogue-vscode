@@ -1,15 +1,29 @@
 import * as vscode from 'vscode';
-import * as sdk from './sdk';
+import * as components from './components';
 import * as cmake from './cmake';
 import * as path from 'path';
-import * as childProcess from 'child_process';
 
 export function register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
-        'webrogue-vscode.updateSDK',
+        'webrogue-vscode.updateComponents',
         async () => {
             try {
-                await sdk.installSDK(context);
+                let choice = await vscode.window.showQuickPick(
+                    components.ALL_DOWNLOADABLE_TYPES.map(t => t.getName()),
+                    {
+                        canPickMany: true,
+                        placeHolder: "Select components to install/update"
+                    }
+                );
+                if (!choice) {
+                    return;
+                }
+                for (const component of components.ALL_DOWNLOADABLE_TYPES) {
+                    if (choice.indexOf(component.getName()) === -1) {
+                        continue;
+                    }
+                    await components.installComponent<unknown>(context, component);
+                }
                 await cmake.checkCmakeExtension(context);
             } catch (e) {
                 vscode.window.showErrorMessage(
@@ -19,19 +33,41 @@ export function register(context: vscode.ExtensionContext) {
         }
     ));
     context.subscriptions.push(vscode.commands.registerCommand(
-        'webrogue-vscode.deleteSDK',
+        'webrogue-vscode.deleteComponents',
         async () => {
-            await sdk.deleteSDK(context);
+            let variants = [];
+            for (const component of components.ALL_DOWNLOADABLE_TYPES) {
+                if (await components.getDownloadedComponent<unknown>(context, component) !== null) {
+                    variants.push(component.getName());
+                }
+            }
+
+            let choice = await vscode.window.showQuickPick(
+                variants,
+                {
+                    canPickMany: true,
+                    placeHolder: "Select components to delete"
+                }
+            );
+            if (!choice) {
+                return;
+            }
+            for (const component of components.ALL_DOWNLOADABLE_TYPES) {
+                if (choice.indexOf(component.getName()) === -1) {
+                    continue;
+                }
+                await components.deleteComponent<unknown>(context, component);
+            }
         }
     ));
     context.subscriptions.push(vscode.commands.registerCommand(
         'webrogue-vscode.getWebrogueBinPath',
         async () => {
-            let sdkInfo = await sdk.ensureSDK(context);
-            if (!sdkInfo) {
+            let cliInfo = await components.ensureComponent(context, components.CLI_DOWNLOADABLE_TYPE);
+            if (!cliInfo) {
                 return;
             }
-            await vscode.env.clipboard.writeText(sdkInfo.webrogueBin.fsPath);
+            await vscode.env.clipboard.writeText(cliInfo.bin.fsPath);
             vscode.window.showInformationMessage(
                 "Path to Webrogue binary has been copied to your clipboard",
             );
@@ -40,8 +76,8 @@ export function register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
         'webrogue-vscode.pack',
         async () => {
-            let sdkInfo = await sdk.ensureSDK(context);
-            if (!sdkInfo) {
+            let cliInfo = await components.ensureComponent(context, components.CLI_DOWNLOADABLE_TYPE);
+            if (!cliInfo) {
                 return;
             }
 
@@ -59,7 +95,6 @@ export function register(context: vscode.ExtensionContext) {
             }
             if (!variant) { return; }
             let outDir = path.dirname(variant);
-
             let args = [
                 "pack",
                 "--config",
@@ -67,21 +102,7 @@ export function register(context: vscode.ExtensionContext) {
                 "--output",
                 outDir
             ];
-
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Packaging WRAPP file",
-            }, async () => {
-                await new Promise<void>((resolve, reject) => {
-                    childProcess.execFile(sdkInfo.webrogueBin.fsPath, args, (error, stdout, stderr) => {
-                        if (error) {
-                            reject(error);
-                        } else {
-                            resolve();
-                        }
-                    });
-                });
-            });
+            await cliInfo.runManaged("Packaging WRAPP file", args);
         }
     ));
 }

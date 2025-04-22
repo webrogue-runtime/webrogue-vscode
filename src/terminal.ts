@@ -1,6 +1,6 @@
 
 import * as vscode from 'vscode';
-import * as sdk from './sdk';
+import * as components from './components';
 import * as childProcess from 'child_process';
 
 
@@ -29,13 +29,13 @@ export class TaskTerminal implements vscode.Pseudoterminal {
 
     private async doBuild(): Promise<void> {
         try {
-            let sdkInfo = await sdk.ensureSDK(this.context);
-            if (!sdkInfo) {
-                throw Error("Webrogue SDK is not installed.");
+            let cliInfo = await components.ensureComponent(this.context, components.CLI_DOWNLOADABLE_TYPE);
+            if (!cliInfo) {
+                throw Error("Webrogue CLI utility is not installed.");
             }
             await this.work(async (args) => {
                 let promise = new Promise<void>((resolve, reject) => {
-                    this.process = childProcess.execFile(sdkInfo.webrogueBin.fsPath, args, (error, stdout, stderr) => {
+                    this.process = childProcess.execFile(cliInfo.bin.fsPath, args, (error, stdout, stderr) => {
                         delete this.process;
                         if (error) {
                             reject(error);

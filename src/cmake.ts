@@ -1,6 +1,6 @@
 
 import * as vscode from 'vscode';
-import * as sdk from './sdk';
+import * as components from './components';
 
 function getWatchedCmakeKitsPath(api: any): string | undefined {
     let watched: object = api.manager.kitsWatcher.getWatched();
@@ -15,7 +15,7 @@ export async function checkCmakeExtension(context: vscode.ExtensionContext) {
 
         let sdk_info;
         try {
-            sdk_info = await sdk.getSDK(context);
+            sdk_info = await components.getDownloadedComponent(context, components.SDK_DOWNLOADABLE_TYPE);
         } catch {
             return;
         }

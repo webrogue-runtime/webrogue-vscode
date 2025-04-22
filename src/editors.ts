@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as common from './wrapp_editor/common';
-import * as sdk from './sdk';
+import * as components from './components';
 import * as path from 'path';
 
 
@@ -53,23 +53,23 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
                     break;
 
                 case common.BUILD_WINDOWS_COMMAND: {
-                    let sdkInfo = await sdk.ensureSDK(this._context);
+                    let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
                     let args = ["compile", "windows"];
                     args.push(document.uri.fsPath);
                     args.push(path.join(path.dirname(document.uri.fsPath), "out.exe"));
                     if (document.state.isWindowsConsole) {
                         args.push("--console");
                     }
-                    await sdkInfo?.runManaged("Building Windows executable", args);
+                    await cliInfo?.runManaged("Building Windows executable", args);
                     break;
                 }
 
                 case common.BUILD_LINUX_COMMAND: {
-                    let sdkInfo = await sdk.ensureSDK(this._context);
+                    let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
                     let args = ["compile", "linux"];
                     args.push(document.uri.fsPath);
                     args.push(path.join(path.dirname(document.uri.fsPath), "a.out"));
-                    await sdkInfo?.runManaged("Building Linux executable", args);
+                    await cliInfo?.runManaged("Building Linux executable", args);
                     break;
                 }
 

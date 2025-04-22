@@ -9,6 +9,10 @@ export function activate(context: vscode.ExtensionContext) {
 	commands.register(context);
 	editors.register(context);
 	cmake.checkCmakeExtension(context);
+	vscode.extensions.onDidChange(
+		() => cmake.checkCmakeExtension(context),
+		context.subscriptions,
+	);
 }
 
 export function deactivate() { }

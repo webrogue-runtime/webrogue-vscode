@@ -19,12 +19,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "webrogue-vscode.updateSDK",
-        "title": "Install/Update Webrogue SDK"
+        "command": "webrogue-vscode.updateComponents",
+        "title": "Install/Update Webrogue components"
       },
       {
-        "command": "webrogue-vscode.deleteSDK",
-        "title": "Uninstall Webrogue SDK"
+        "command": "webrogue-vscode.deleteComponents",
+        "title": "Uninstall Webrogue components"
       },
       {
         "command": "webrogue-vscode.getWebrogueBinPath",
