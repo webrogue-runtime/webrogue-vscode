@@ -44,6 +44,14 @@ export const SDK_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedSDK> = {
             } else {
                 throw new Error("Unsupported platform");
             }
+        } if (platform === "darwin") {
+            if (arch === "x64") {
+                return "webrogue-sdk-x86_64-macos";
+            } else if (arch === "arm64") {
+                return "webrogue-sdk-arm64-macos";
+            } else {
+                throw new Error("Unsupported platform");
+            }
         } else {
             throw new Error("Unsupported platform");
         }
@@ -114,6 +122,14 @@ export const CLI_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedCLI> = {
             } else {
                 throw new Error("Unsupported platform");
             }
+        } else if (platform === "darwin") {
+            if (arch === "x64") {
+                return "webrogue-cli-macos-x86_64";
+            } else if (arch === "arm64") {
+                return "webrogue-cli-macos-arm64";
+            } else {
+                throw new Error("Unsupported platform");
+            }
         } else {
             throw new Error("Unsupported platform");
         }
@@ -143,24 +159,11 @@ function assumeDownloaded<DownloadedComponent>(
     archiveName: string,
     isZip: boolean,
 } {
-    let componentName = component.getDirName(os.platform(), os.arch());
-    let isZip;
+    let platform = os.platform();
+    let arch = os.arch()
+    let componentName = component.getDirName(platform, arch);
+    let isZip = platform === "win32";
 
-    if (os.platform() === "linux") {
-        if (os.arch() === "x64") {
-            isZip = false;
-        } else {
-            throw new Error("Unsupported platform");
-        }
-    } else if (os.platform() === "win32") {
-        if (os.arch() === "x64") {
-            isZip = true;
-        } else {
-            throw new Error("Unsupported platform");
-        }
-    } else {
-        throw new Error("Unsupported platform");
-    }
     let storage = context.globalStorageUri;
     let componentDir = vscode.Uri.joinPath(storage, "components", componentName);
     return {

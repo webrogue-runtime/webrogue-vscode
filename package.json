@@ -20,19 +20,19 @@
     "commands": [
       {
         "command": "webrogue-vscode.updateComponents",
-        "title": "Install/Update Webrogue components"
+        "title": "Webrogue: Install/Update components"
       },
       {
         "command": "webrogue-vscode.deleteComponents",
-        "title": "Uninstall Webrogue components"
+        "title": "Webrogue: Uninstall components"
       },
       {
         "command": "webrogue-vscode.getWebrogueBinPath",
-        "title": "Copy path to Webrogue binary"
+        "title": "Webrogue: Copy path to CLI binary"
       },
       {
         "command": "webrogue-vscode.pack",
-        "title": "Pack Webrogue configuration into WRAPP"
+        "title": "Webrogue: Pack into WRAPP"
       }
     ],
     "taskDefinitions": [

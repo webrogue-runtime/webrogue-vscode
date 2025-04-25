@@ -1,5 +1,5 @@
 {
-    "devDependencies": {
+    "dependencies": {
         "@types/vscode-webview": "^1.57.5"
     }
 }
