@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as components from './components';
 import * as cmake from './cmake';
 import * as path from 'path';
+import * as cache from './cache';
 
 export function register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
@@ -105,4 +106,11 @@ export function register(context: vscode.ExtensionContext) {
             await cliInfo.runManaged("Packaging WRAPP file", args);
         }
     ));
+    context.subscriptions.push(vscode.commands.registerCommand(
+        'webrogue-vscode.clearCompilationCache',
+        async () => {
+            await cache.clean(context);
+        }
+    ));
+
 }

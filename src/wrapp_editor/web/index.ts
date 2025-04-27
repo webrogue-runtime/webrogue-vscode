@@ -7,12 +7,21 @@ window.addEventListener('message', async e => {
 });
 
 function init(state: common.State) {
-    function sendState() {
+    function sendCommand<Command extends common.CommandID>(id: Command, data: common.CommandMap[Command]) {
         vscode.postMessage({
-            command: common.SET_STATE_COMMAND,
-            state: state
+            command: id,
+            data: data
         });
     }
+
+    function sendState() {
+        sendCommand("setState", state);
+    }
+
+    let debugButton = <HTMLButtonElement>document.getElementById(common.DEBUG_BUTTON_ID)!;
+    debugButton.addEventListener("click", () => {
+        sendCommand("debug", undefined);
+    });
 
     let isWindowConsoleCheckbox = <HTMLInputElement>document.getElementById(common.IS_WINDOWS_CONSOLE_CHECKBOX_ID)!;
     isWindowConsoleCheckbox.checked = state.isWindowsConsole;
@@ -23,17 +32,11 @@ function init(state: common.State) {
 
     let buildWindowsButton = <HTMLButtonElement>document.getElementById(common.BUILD_WINDOWS_BUTTON_ID)!;
     buildWindowsButton.addEventListener("click", () => {
-        vscode.postMessage({
-            command: common.BUILD_WINDOWS_COMMAND
-
-        });
+        sendCommand("buildWindows", undefined);
     });
 
     let buildLinuxButton = <HTMLButtonElement>document.getElementById(common.BUILD_LINUX_BUTTON_ID)!;
     buildLinuxButton.addEventListener("click", () => {
-        vscode.postMessage({
-            command: common.BUILD_LINUX_COMMAND
-
-        });
+        sendCommand("buildLinux", undefined);
     });
 }

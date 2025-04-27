@@ -5,6 +5,7 @@ import * as tar from 'tar';
 import * as cmake from './cmake';
 import * as jszip from 'jszip';
 import * as childProcess from 'child_process';
+import * as cache from './cache';
 
 interface DownloadableComponentType<DownloadedComponent> {
     getReleasesURL(): string
@@ -145,9 +146,63 @@ export const CLI_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedCLI> = {
     },
 };
 
+
+class DownloadedDAP {
+    constructor(
+        readonly bin: vscode.Uri,
+    ) { }
+}
+
+export const DAP_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedDAP> = {
+    getReleasesURL(): string {
+        return "https://api.github.com/repos/webrogue-runtime/lldb-dap-builder/releases/latest";
+    },
+    getName(): string {
+        return "Fallback LLDB-DAP executable";
+    },
+    versionFile(): string {
+        return "lldb_dap_version";
+    },
+    getDirName(platform: string, arch: string) {
+        if (platform === "linux") {
+            if (arch === "x64") {
+                return "lldb-dap-linux-x86_64";
+            } else {
+                throw new Error("Unsupported platform");
+            }
+        } else if (platform === "win32") {
+            if (arch === "x64") {
+                return "lldb-dap-windows-x86_64";
+            } else {
+                throw new Error("Unsupported platform");
+            }
+        } else if (platform === "darwin") {
+            if (arch === "x64") {
+                return "lldb-dap-macos-x86_64";
+            } else if (arch === "arm64") {
+                return "lldb-dap-macos-arm64";
+            } else {
+                throw new Error("Unsupported platform");
+            }
+        } else {
+            throw new Error("Unsupported platform");
+        }
+    },
+    async getDownloaded(componentDir: vscode.Uri, platform: string, arch: string): Promise<DownloadedDAP | null> {
+        let bin = vscode.Uri.joinPath(componentDir, "bin", platform === "win32" ? "lldb-dap.exe" : "lldb-dap");
+        try {
+            await vscode.workspace.fs.stat(bin);
+        } catch {
+            return null;
+        }
+        return new DownloadedDAP(bin);
+    },
+};
+
 export const ALL_DOWNLOADABLE_TYPES = [
     CLI_DOWNLOADABLE_TYPE,
     SDK_DOWNLOADABLE_TYPE,
+    DAP_DOWNLOADABLE_TYPE,
 ];
 
 function assumeDownloaded<DownloadedComponent>(
@@ -160,7 +215,7 @@ function assumeDownloaded<DownloadedComponent>(
     isZip: boolean,
 } {
     let platform = os.platform();
-    let arch = os.arch()
+    let arch = os.arch();
     let componentName = component.getDirName(platform, arch);
     let isZip = platform === "win32";
 
@@ -215,11 +270,12 @@ export async function installComponent<DownloadedComponent>(
         }
         let response = JSON.parse(await (await metadata_response.blob()).text());
 
-        let latest_sdk_version: string = response["created_at"];
-        let asset = (<{ name: string, size: number, browser_download_url: string }[]>response["assets"]).find(asset => asset.name === componentInfo.archiveName);
+        let assets: { name: string, size: number, browser_download_url: string, updated_at: string }[] = response["assets"];
+        let asset = assets.find(asset => asset.name === componentInfo.archiveName);
         if (!asset) {
             return;
         }
+        let latest_sdk_version: string = asset.updated_at;
         let version_file_path = vscode.Uri.joinPath(storage, "components", component.versionFile());
         let current_version = "";
         try {
@@ -318,6 +374,7 @@ export async function installComponent<DownloadedComponent>(
         });
 
         await cmake.checkCmakeExtension(context);
+        await cache.clean(context);
     });
 }
 
@@ -329,7 +386,11 @@ export async function ensureComponent<DownloadedComponent>(
     if (downloaded) {
         return downloaded;
     }
-    let answer = await vscode.window.showWarningMessage(`${component.getName()} is not installed.`, "Download");
+    let answer = await vscode.window.showWarningMessage(
+        `${component.getName()} is not installed.`,
+        { modal: true },
+        "Download"
+    );
     if (!answer) {
         return null;
     }

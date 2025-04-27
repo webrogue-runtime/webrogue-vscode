@@ -33,6 +33,10 @@
       {
         "command": "webrogue-vscode.pack",
         "title": "Webrogue: Pack into WRAPP"
+      },
+      {
+        "command": "webrogue-vscode.clearCompilationCache",
+        "title": "Webrogue: Clear compilation cache"
       }
     ],
     "taskDefinitions": [
@@ -59,6 +63,70 @@
           }
         ],
         "priority": "default"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "webrogue",
+      "properties": {}
+    },
+    "breakpoints": [
+      {
+        "language": "c"
+      },
+      {
+        "language": "cpp"
+      },
+      {
+        "language": "rust"
+      },
+      {
+        "language": "swift"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "webrogue",
+        "label": "Webrogue LLDB DAP Debugger",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Path to the program to debug."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "webrogue",
+            "request": "launch",
+            "name": "Debug Webrogue Application",
+            "program": "${workspaceRoot}/webrogue.json"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Webrogue LLDB: Launch",
+            "description": "",
+            "body": {
+              "type": "webrogue",
+              "request": "launch",
+              "name": "${2:Debug Webrogue Application}",
+              "program": "^\"\\${workspaceRoot}/${1:webrogue.json}\""
+            }
+          }
+        ]
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": "webrogue.json",
+        "url": "./webrogue-config-schema.json"
       }
     ]
   },

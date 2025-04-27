@@ -45,37 +45,45 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 
         this.setHTML(webviewPanel.webview);
 
+        var handlers: Map<common.CommandID, (data: any) => void | PromiseLike<void>> = new Map();
 
-        webviewPanel.webview.onDidReceiveMessage(async event => {
-            switch (event.command) {
-                case common.SET_STATE_COMMAND:
-                    document.state = event.state;
-                    break;
+        function listen<Command extends common.CommandID>(
+            id: Command,
+            handler: (data: common.CommandMap[Command]) => undefined | void | PromiseLike<undefined | void>
+        ) {
+            handlers.set(id, handler);
+        }
 
-                case common.BUILD_WINDOWS_COMMAND: {
-                    let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
-                    let args = ["compile", "windows"];
-                    args.push(document.uri.fsPath);
-                    args.push(path.join(path.dirname(document.uri.fsPath), "out.exe"));
-                    if (document.state.isWindowsConsole) {
-                        args.push("--console");
-                    }
-                    await cliInfo?.runManaged("Building Windows executable", args);
-                    break;
-                }
-
-                case common.BUILD_LINUX_COMMAND: {
-                    let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
-                    let args = ["compile", "linux"];
-                    args.push(document.uri.fsPath);
-                    args.push(path.join(path.dirname(document.uri.fsPath), "a.out"));
-                    await cliInfo?.runManaged("Building Linux executable", args);
-                    break;
-                }
-
-                default:
-                    break;
+        listen("setState", (state) => {
+            document.state = state;
+        });
+        listen("debug", async () => {
+            await vscode.debug.startDebugging(undefined, {
+                name: "Debug WRAPP",
+                type: "webrogue",
+                request: "launch",
+                program: document.uri.fsPath
+            });
+        });
+        listen("buildWindows", async () => {
+            let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
+            let args = ["compile", "windows"];
+            args.push(document.uri.fsPath);
+            args.push(path.join(path.dirname(document.uri.fsPath), "out.exe"));
+            if (document.state.isWindowsConsole) {
+                args.push("--console");
             }
+            await cliInfo?.runManaged("Building Windows executable", args);
+        });
+        listen("buildLinux", async () => {
+            let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
+            let args = ["compile", "linux"];
+            args.push(document.uri.fsPath);
+            args.push(path.join(path.dirname(document.uri.fsPath), "a.out"));
+            await cliInfo?.runManaged("Building Linux executable", args);
+        });
+        webviewPanel.webview.onDidReceiveMessage(async event => {
+            handlers.get(event.command)?.(event.data);
         });
 
         webviewPanel.webview.postMessage(document.state);
@@ -126,6 +134,8 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 				<title>Paw Draw</title>
 			</head>
 			<body>
+				<button id="${common.DEBUG_BUTTON_ID}">Run and debug</button>
+
                 <h1>Windows</h1>
                 <input id="${common.IS_WINDOWS_CONSOLE_CHECKBOX_ID}" type="checkbox">Show console while running resulting application</input>
                 <br>
