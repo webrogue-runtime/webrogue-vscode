@@ -1,5 +1,7 @@
 {
   "name": "webrogue-vscode",
+  "publisher": "webrogue",
+  "icon": "./logo.png",
   "displayName": "Webrogue",
   "description": "Webrogue support for Visual Studio Code",
   "version": "0.0.1",
@@ -10,7 +12,13 @@
     "vscode": "^1.99.0"
   },
   "categories": [
+    "Debuggers",
     "Other"
+  ],
+  "keywords": [
+    "webrogue",
+    "webassembly",
+    "wasm"
   ],
   "activationEvents": [
     "workspaceContains:webrogue.json"

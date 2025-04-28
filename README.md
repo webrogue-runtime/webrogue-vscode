@@ -1,11 +1,15 @@
 # Webrogue extension for Visual Studio Code
 
+Read about Webrogue at https://webrogue-runtime.github.io/
+
 ## Features
 
-Currently this extension offers only the following features:
-- Downloading and updating Webrogue SDK
-- Task to package WRAPP files
-- Providing "kit" for CMake extension.
+- Downloading and updating Webrogue CLI and SDK
+- Debugging Webrogue applications using [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), [LLDB-DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap) or built-in fallback LLDB-DAP executable
+- Packaging WRAPP files
+- Compiling WRAPP files to Windows and Linux executables
+- [CMake extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) integration
+- Schema for `webrogue.json`
 
 ## Requirements
 

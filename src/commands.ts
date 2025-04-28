@@ -82,24 +82,50 @@ export function register(context: vscode.ExtensionContext) {
                 return;
             }
 
-            let selectText = "[Select path]";
+            let selectText = "[Other path]";
 
-            var variant = await vscode.window.showQuickPick((async () => {
-                let variants = (await vscode.workspace.findFiles("**/webrogue.json")).map(p => p.fsPath);
-                variants.push(selectText);
-                return variants;
-            })());
+            let variantMap: Map<string, vscode.Uri> = new Map();
+
+            var variant = await vscode.window.showQuickPick(
+                (async () => {
+                    let variants = await vscode.workspace.findFiles("**/webrogue.json");
+                    var result = [];
+
+                    for (const variant of variants) {
+                        var visible = variant.fsPath;
+                        for (const folder of vscode.workspace.workspaceFolders ?? []) {
+                            if (visible.startsWith(folder.uri.fsPath)) {
+                                let prefix = vscode.workspace.workspaceFolders?.length === 1 ? "." : `\${workspaceFolder:${folder.name}}`;
+                                visible = `${prefix}${visible.slice(folder.uri.fsPath.length)}`;
+                            }
+                        }
+                        variantMap.set(visible, variant);
+                        result.push(visible);
+                    }
+
+                    // ).map(p => p.fsPath);
+                    result.push(selectText);
+                    return result;
+                })(),
+                {
+                    placeHolder: "Select webrogue.json config file to package"
+                }
+            );
+            var file;
+            if (!variant) { return; }
             if (variant === selectText) {
-                variant = await vscode.window.showInputBox({
+                file = await vscode.window.showInputBox({
                     value: vscode.workspace.workspaceFolders?.at(0)?.uri?.fsPath
                 });
+            } else {
+                file = variantMap.get(variant)?.fsPath;
             }
-            if (!variant) { return; }
-            let outDir = path.dirname(variant);
+            if (!file) { return; }
+            let outDir = path.dirname(file);
             let args = [
                 "pack",
                 "--config",
-                variant,
+                file,
                 "--output",
                 outDir
             ];

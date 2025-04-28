@@ -130,6 +130,13 @@
                     }
                 }
             }
+        },
+        "env": {
+            "type": "object",
+            "description": "Environment variables",
+            "additionalItems": {
+                "type": "string"
+            }
         }
     }
 }
