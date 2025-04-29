@@ -1,0 +1,23 @@
+name: Publish extension
+
+on:
+  workflow_dispatch
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        npm install
+        cd src/wrapp_editor && npm install && cd ../..
+        npm install -g @vscode/vsce
+
+    - name: Publish
+      env:
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      run: |
+        vsce publish
