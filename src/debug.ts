@@ -81,7 +81,7 @@ Possible solutions are:
             args: [
                 "run",
                 "--cache",
-                await cache.getConfig(this.context),
+                (await cache.getConfig(this.context)).fsPath,
                 debugConfiguration.program
             ],
             // Keep as is
