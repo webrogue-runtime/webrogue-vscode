@@ -19,7 +19,7 @@ class WRAPPDocument extends vscode.Disposable implements vscode.CustomDocument {
         uri: vscode.Uri,
     ): Promise<WRAPPDocument> {
         let state: common.State = {
-            isWindowsConsole: true,
+            isWindowsConsole: false,
         };
         return new WRAPPDocument(uri, state);
     }
