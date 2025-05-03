@@ -68,7 +68,7 @@ export const SDK_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedSDK> = {
     }
 };
 
-class DownloadedCLI {
+class CLI {
     constructor(
         readonly bin: vscode.Uri,
     ) { }
@@ -100,7 +100,7 @@ class DownloadedCLI {
     }
 }
 
-export const CLI_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedCLI> = {
+const CLI_DOWNLOADABLE_TYPE: DownloadableComponentType<CLI> = {
     getReleasesURL(): string {
         return "https://api.github.com/repos/webrogue-runtime/webrogue/releases/latest";
     },
@@ -135,14 +135,14 @@ export const CLI_DOWNLOADABLE_TYPE: DownloadableComponentType<DownloadedCLI> = {
             throw new Error("Unsupported platform");
         }
     },
-    async getDownloaded(componentDir: vscode.Uri, platform: string, arch: string): Promise<DownloadedCLI | null> {
+    async getDownloaded(componentDir: vscode.Uri, platform: string, arch: string): Promise<CLI | null> {
         let bin = vscode.Uri.joinPath(componentDir, platform === "win32" ? "webrogue.exe" : "webrogue");
         try {
             await vscode.workspace.fs.stat(bin);
         } catch {
             return null;
         }
-        return new DownloadedCLI(bin);
+        return new CLI(bin);
     },
 };
 
@@ -479,4 +479,16 @@ export async function updateAll(
             await installComponent<unknown>(context, component, "auto");
         }
     }
+}
+
+export async function ensureCLI(
+    context: vscode.ExtensionContext,
+    folder: vscode.WorkspaceFolder | null | undefined
+): Promise<CLI | null> {
+    let customBinary: string | undefined = vscode.workspace.getConfiguration("webrogue", folder).get("CliUtilityPath");
+    if(!customBinary) {
+        return await ensureComponent(context, CLI_DOWNLOADABLE_TYPE);
+    }
+    let customBinaryUri = vscode.Uri.file(customBinary);
+    return new CLI(customBinaryUri)
 }

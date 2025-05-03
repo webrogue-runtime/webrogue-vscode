@@ -15,6 +15,7 @@ export class TaskTerminal implements vscode.Pseudoterminal {
 
     constructor(
         private context: vscode.ExtensionContext,
+        private folder: vscode.WorkspaceFolder | null,
         private work: (run: Run) => Promise<void>,
     ) { }
 
@@ -29,7 +30,7 @@ export class TaskTerminal implements vscode.Pseudoterminal {
 
     private async doBuild(): Promise<void> {
         try {
-            let cliInfo = await components.ensureComponent(this.context, components.CLI_DOWNLOADABLE_TYPE);
+            let cliInfo = await components.ensureCLI(this.context, this.folder);
             if (!cliInfo) {
                 throw Error("Webrogue CLI utility is not installed.");
             }

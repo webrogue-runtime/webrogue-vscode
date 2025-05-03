@@ -19,6 +19,7 @@ function makePackTask(
         TaskType,
         new vscode.CustomExecution(async (resolvedDefinition) => new terminal.TaskTerminal(
             context,
+            typeof scope === "object" ? scope : null,
             async (run) => {
                 let configUri = vscode.Uri.file(resolvedDefinition.config);
                 let configStat = await vscode.workspace.fs.stat(configUri);

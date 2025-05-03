@@ -66,7 +66,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
             });
         });
         listen("buildWindows", async () => {
-            let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
+            let cliInfo = await components.ensureCLI(this._context, vscode.workspace.getWorkspaceFolder(document.uri));
             let args = ["compile", "windows"];
             args.push(document.uri.fsPath);
             args.push(path.join(path.dirname(document.uri.fsPath), "out.exe"));
@@ -76,7 +76,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
             await cliInfo?.runManaged("Building Windows executable", args);
         });
         listen("buildLinux", async () => {
-            let cliInfo = await components.ensureComponent(this._context, components.CLI_DOWNLOADABLE_TYPE);
+            let cliInfo = await components.ensureCLI(this._context, vscode.workspace.getWorkspaceFolder(document.uri));
             let args = ["compile", "linux"];
             args.push(document.uri.fsPath);
             args.push(path.join(path.dirname(document.uri.fsPath), "a.out"));

@@ -68,7 +68,7 @@ Possible solutions are:
             type = "lldb-dap";
         }
 
-        let cli = await components.ensureComponent(this.context, components.CLI_DOWNLOADABLE_TYPE);
+        let cli = await components.ensureCLI(this.context, folder);
         if (!cli) {
             throw new Error("Webrogue CLI component is required to debug Webrogue applications");
         }

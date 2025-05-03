@@ -4,7 +4,7 @@
   "icon": "./logo.png",
   "displayName": "Webrogue",
   "description": "Webrogue support for Visual Studio Code",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "repository": {
     "url": "https://github.com/webrogue-runtime/webrogue-vscode.git"
   },
@@ -81,6 +81,11 @@
           "type": "boolean",
           "description": "Check for component updates when extension starts.",
           "default": true
+        },
+        "webrogue.CliUtilityPath": {
+          "scope": "machine-overridable",
+          "type": "string",
+          "description": "Path to custom Webrogue CLI Program."
         }
       }
     },

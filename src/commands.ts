@@ -64,7 +64,7 @@ export function register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
         'webrogue-vscode.getWebrogueBinPath',
         async () => {
-            let cliInfo = await components.ensureComponent(context, components.CLI_DOWNLOADABLE_TYPE);
+            let cliInfo = await components.ensureCLI(context, null);
             if (!cliInfo) {
                 return;
             }
@@ -77,11 +77,6 @@ export function register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand(
         'webrogue-vscode.pack',
         async () => {
-            let cliInfo = await components.ensureComponent(context, components.CLI_DOWNLOADABLE_TYPE);
-            if (!cliInfo) {
-                return;
-            }
-
             let selectText = "[Other path]";
 
             let variantMap: Map<string, vscode.Uri> = new Map();
@@ -129,6 +124,11 @@ export function register(context: vscode.ExtensionContext) {
                 "--output",
                 outDir
             ];
+
+            let cliInfo = await components.ensureCLI(context, vscode.workspace.getWorkspaceFolder(vscode.Uri.file(file)));
+            if (!cliInfo) {
+                return;
+            }
             await cliInfo.runManaged("Packaging WRAPP file", args);
         }
     ));
