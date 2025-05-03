@@ -42,7 +42,7 @@ Possible solutions are:
             );
 
             if (answer === downloadDAPComponent) {
-                await components.installComponent(this.context, components.DAP_DOWNLOADABLE_TYPE);
+                await components.installComponent(this.context, components.DAP_DOWNLOADABLE_TYPE, "ensure");
             } else if (answer === installCodeLLDB) {
                 await vscode.env.openExternal(vscode.Uri.from({
                     scheme: vscode.env.uriScheme,

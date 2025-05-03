@@ -237,56 +237,107 @@ export async function getDownloadedComponent<DownloadedComponent>(
     return await component.getDownloaded(assumption.componentDir, os.platform(), os.arch());
 }
 
+interface UpdateInfo<DownloadedComponent> {
+    componentArchivePath: vscode.Uri,
+    asset: {
+        name: string;
+        size: number;
+        browser_download_url: string;
+        updated_at: string;
+    },
+    componentInfo: {
+        componentName: string;
+        componentDir: vscode.Uri;
+        archiveName: string;
+        isZip: boolean;
+    },
+    version_file_path: vscode.Uri,
+    latest_sdk_version: string,
+}
+
+/// Returns null if update is not available
+async function checkForUpdate<DownloadedComponent>(
+    context: vscode.ExtensionContext,
+    component: DownloadableComponentType<DownloadedComponent>,
+): Promise<null | UpdateInfo<DownloadedComponent>> {
+    let storage = context.globalStorageUri;
+    try {
+        await vscode.workspace.fs.createDirectory(storage);
+    } catch { };
+    try {
+        await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(storage, "components"));
+    } catch { };
+    let componentInfo = assumeDownloaded(context, component);
+    let downloadedComponent = await getDownloadedComponent(context, component);
+    let componentArchivePath = vscode.Uri.joinPath(storage, "components", componentInfo.archiveName);
+
+
+    let metadata_response = await fetch(component.getReleasesURL(), {
+        headers: [
+            ["Accept", "application/vnd.github+json"],
+            ["X-GitHub-Api-Version", "2022-11-28"]
+        ]
+    });
+    if (!metadata_response.ok || !metadata_response.body) {
+        throw new Error("Fetch error");
+    }
+    let response = JSON.parse(await (await metadata_response.blob()).text());
+
+    let assets: { name: string, size: number, browser_download_url: string, updated_at: string }[] = response["assets"];
+    let asset = assets.find(asset => asset.name === componentInfo.archiveName);
+    if (!asset) {
+        return null;
+    }
+    let latest_sdk_version: string = asset.updated_at;
+    let version_file_path = vscode.Uri.joinPath(storage, "components", component.versionFile());
+    let current_version = "";
+    try {
+        current_version = new TextDecoder().decode(await vscode.workspace.fs.readFile(version_file_path));
+    } catch { }
+
+    if ((current_version === latest_sdk_version) && (downloadedComponent !== undefined)) {
+        return null;
+    }
+
+    return {
+        componentArchivePath: componentArchivePath,
+        asset: asset,
+        componentInfo: componentInfo,
+        version_file_path: version_file_path,
+        latest_sdk_version: latest_sdk_version
+    }
+}
+
 export async function installComponent<DownloadedComponent>(
     context: vscode.ExtensionContext,
-    component: DownloadableComponentType<DownloadedComponent>
+    component: DownloadableComponentType<DownloadedComponent>,
+    source: "command" | "auto" | "ensure"
 ) {
+    let storage = context.globalStorageUri;
+    var updateInfo: null | UpdateInfo<DownloadedComponent> = null;
+    if (source === "auto") {
+        updateInfo = await checkForUpdate(context, component);
+        if (!updateInfo) {
+            return
+        }
+    }
+
     await vscode.window.withProgress({
         title: `Installing ${component.getName()}`,
         location: vscode.ProgressLocation.Notification
     }, async (progress) => {
-        let storage = context.globalStorageUri;
-        try {
-            await vscode.workspace.fs.createDirectory(storage);
-        } catch { };
-        try {
-            await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(storage, "components"));
-        } catch { };
-        let componentInfo = assumeDownloaded(context, component);
-        let downloadedComponent = await getDownloadedComponent(context, component);
-        let componentArchivePath = vscode.Uri.joinPath(storage, "components", componentInfo.archiveName);
-
-        progress.report({
-            message: `checking version`
-        });
-        let metadata_response = await fetch(component.getReleasesURL(), {
-            headers: [
-                ["Accept", "application/vnd.github+json"],
-                ["X-GitHub-Api-Version", "2022-11-28"]
-            ]
-        });
-        if (!metadata_response.ok || !metadata_response.body) {
-            throw new Error("Fetch error");
+        if (source !== "auto") {
+            progress.report({
+                message: `checking version`
+            });
+            updateInfo = await checkForUpdate(context, component);
         }
-        let response = JSON.parse(await (await metadata_response.blob()).text());
-
-        let assets: { name: string, size: number, browser_download_url: string, updated_at: string }[] = response["assets"];
-        let asset = assets.find(asset => asset.name === componentInfo.archiveName);
-        if (!asset) {
-            return;
+        if (!updateInfo) {
+            return
         }
-        let latest_sdk_version: string = asset.updated_at;
-        let version_file_path = vscode.Uri.joinPath(storage, "components", component.versionFile());
-        let current_version = "";
-        try {
-            current_version = new TextDecoder().decode(await vscode.workspace.fs.readFile(version_file_path));
-        } catch { }
+        let { asset, componentArchivePath, componentInfo, version_file_path, latest_sdk_version } = updateInfo;
 
-        if ((current_version === latest_sdk_version) && (downloadedComponent !== undefined)) {
-            return;
-        }
         let archiveResponse = await fetch(asset.browser_download_url);
-
         if (!archiveResponse.ok || !archiveResponse.body) {
             throw new Error("Fetch error");
         }
@@ -394,7 +445,7 @@ export async function ensureComponent<DownloadedComponent>(
     if (!answer) {
         return null;
     }
-    await installComponent(context, component);
+    await installComponent(context, component, "ensure");
     return await getDownloadedComponent(context, component);
 }
 
@@ -418,4 +469,14 @@ export async function deleteComponent<DownloadedComponent>(
             );
         } catch { }
     });
+}
+
+export async function updateAll(
+    context: vscode.ExtensionContext,
+) {
+    for (const component of ALL_DOWNLOADABLE_TYPES) {
+        if (await getDownloadedComponent<unknown>(context, component)) {
+            await installComponent<unknown>(context, component, "auto");
+        }
+    }
 }

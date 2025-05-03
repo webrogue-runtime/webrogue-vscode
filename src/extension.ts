@@ -4,6 +4,7 @@ import * as cmake from './cmake';
 import * as editors from './editors';
 import * as commands from './commands';
 import * as debug from './debug';
+import * as components from './components';
 
 export function activate(context: vscode.ExtensionContext) {
 	tasks.register(context);
@@ -15,6 +16,9 @@ export function activate(context: vscode.ExtensionContext) {
 		() => cmake.checkCmakeExtension(context),
 		context.subscriptions,
 	);
+	if (vscode.workspace.getConfiguration("webrogue", null).get("automaticallyUpdateComponents")) {
+		components.updateAll(context)
+	}
 }
 
 export function deactivate() { }

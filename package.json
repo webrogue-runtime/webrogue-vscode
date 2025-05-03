@@ -74,8 +74,15 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "webrogue",
-      "properties": {}
+      "title": "Webrogue",
+      "properties": {
+        "webrogue.automaticallyUpdateComponents": {
+          "scope": "machine",
+          "type": "boolean",
+          "description": "Check for component updates when extension starts.",
+          "default": true
+        }
+      }
     },
     "breakpoints": [
       {

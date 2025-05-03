@@ -23,7 +23,7 @@ export function register(context: vscode.ExtensionContext) {
                     if (choice.indexOf(component.getName()) === -1) {
                         continue;
                     }
-                    await components.installComponent<unknown>(context, component);
+                    await components.installComponent<unknown>(context, component, "command");
                 }
                 await cmake.checkCmakeExtension(context);
             } catch (e) {
