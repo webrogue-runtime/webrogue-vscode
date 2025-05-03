@@ -5,6 +5,7 @@ Read about Webrogue at https://webrogue-runtime.github.io/
 ## Features
 
 - Downloading and updating Webrogue CLI and SDK
+- Automatic component updates (can be disabled in settings)
 - Debugging Webrogue applications using [CodeLLDB](https://marketplace.visualstudio.com/items?itemName=vadimcn.vscode-lldb), [LLDB-DAP](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.lldb-dap) or built-in fallback LLDB-DAP executable
 - Packaging WRAPP files
 - Compiling WRAPP files to Windows and Linux executables
@@ -13,7 +14,7 @@ Read about Webrogue at https://webrogue-runtime.github.io/
 
 ## Requirements
 
-This extension supports all operation systems supported by Webrogue SDK.
+This extension supports all operation systems Webrogue SDK supports.
 
 ## Known Issues
 
