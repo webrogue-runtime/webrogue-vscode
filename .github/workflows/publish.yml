@@ -107,12 +107,24 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: webrogue-vscode.vsix
+          name: webrogue-vscode-win32-x64.vsix
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webrogue-vscode-linux-x64.vsix
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webrogue-vscode-darwin-x64.vsix
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webrogue-vscode-darwin-arm64.vsix
 
       - uses: ncipollo/release-action@v1
         with:
           artifacts: |
-            webrogue-vscode.vsix
+            webrogue-vscode-*.vsix
           name: Release ${{ needs.package.outputs.version }}
           allowUpdates: false
           tag: ${{ needs.package.outputs.tag }}
