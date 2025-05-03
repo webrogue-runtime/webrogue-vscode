@@ -48,22 +48,16 @@ jobs:
 
   publishMS:
     name: Publish to VS marketplace
-    strategy:
-      matrix:
-        include:
-          - target: win32-x64
-          - target: linux-x64
-          - target: darwin-x64
-          - target: darwin-arm64
     runs-on: ubuntu-latest
     needs: package
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: webrogue-vscode-${{ matrix.target }}.vsix
+          pattern: webrogue-vscode-*.vsix
+          merge-multiple: true
 
       - name: Publish to VS marketplace
-        run: npx @vscode/vsce publish --packagePath ./webrogue-vscode-${{ matrix.target }}.vsix -p ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --packagePath ./webrogue-vscode-*.vsix -p ${{ secrets.VSCE_PAT }}
 
   publishOVSX:
     name: Publish to Open VSX
