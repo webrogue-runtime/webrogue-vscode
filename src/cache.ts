@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-async function assumeDirAndConfigPath(context: vscode.ExtensionContext): Promise<{dir: vscode.Uri, config: vscode.Uri}> {
+async function assumeDirAndConfigPath(context: vscode.ExtensionContext): Promise<{ dir: vscode.Uri, config: vscode.Uri }> {
     var dir = context.globalStorageUri;
     try {
         await vscode.workspace.fs.createDirectory(dir);
@@ -27,7 +27,7 @@ export async function clean(context: vscode.ExtensionContext) {
 }
 
 export async function getConfig(context: vscode.ExtensionContext): Promise<vscode.Uri> {
-    let {dir, config} = await assumeDirAndConfigPath(context);
+    let { dir, config } = await assumeDirAndConfigPath(context);
     let oldConfigFileContent: string | undefined;
     try {
         oldConfigFileContent = new TextDecoder().decode(await vscode.workspace.fs.readFile(config));
@@ -41,4 +41,20 @@ files-total-size-soft-limit = "1Gi"`;
         await vscode.workspace.fs.writeFile(config, new TextEncoder().encode(newConfigFileContent));
     }
     return config;
+}
+
+export async function getBuildDir(context: vscode.ExtensionContext, domain: string): Promise<vscode.Uri> {
+    var dir = context.globalStorageUri;
+    try {
+        await vscode.workspace.fs.createDirectory(dir);
+    } catch { };
+    dir = vscode.Uri.joinPath(dir, "build");
+    try {
+        await vscode.workspace.fs.createDirectory(dir);
+    } catch { };
+    dir = vscode.Uri.joinPath(dir, domain);
+    try {
+        await vscode.workspace.fs.createDirectory(dir);
+    } catch { };
+    return dir;
 }

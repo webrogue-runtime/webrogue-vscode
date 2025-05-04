@@ -4,7 +4,7 @@
   "icon": "./logo.png",
   "displayName": "Webrogue",
   "description": "Webrogue support for Visual Studio Code",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "repository": {
     "url": "https://github.com/webrogue-runtime/webrogue-vscode.git"
   },
@@ -86,6 +86,16 @@
           "scope": "machine-overridable",
           "type": "string",
           "description": "Path to custom Webrogue CLI Program."
+        },
+        "webrogue.javaInstallationDirectory": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to Java installation directory (JAVA_HOME)."
+        },
+        "webrogue.androidSdkDirectory": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to Android SDK directory."
         }
       }
     },

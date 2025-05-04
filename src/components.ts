@@ -74,12 +74,14 @@ class CLI {
     ) { }
 
     async run(args: string[]) {
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<[string, string]>((resolve, reject) => {
             childProcess.execFile(this.bin.fsPath, args, (error, stdout, stderr) => {
                 if (error) {
+                    error.stdout = stdout;
+                    error.stderr = stderr;
                     reject(error);
                 } else {
-                    resolve();
+                    resolve([stdout, stderr]);
                 }
             });
         });
@@ -95,7 +97,35 @@ class CLI {
                 async (_) => { await this.run(args); }
             );
         } catch (e) {
-            vscode.window.showErrorMessage(`${e}`);
+            let error = <childProcess.ExecFileException>e;
+            let openSettingsAnswer = "Open settings";
+            if (error.stderr && error.stderr!.includes("Java executable not found")) {
+                vscode.window.showErrorMessage(
+                    "Webrogue CLI utility is unable to find Java executable. You can specify path to Java installation directory in settings.",
+                    openSettingsAnswer
+                ).then(async answer => {
+                    if (answer === openSettingsAnswer) {
+                        await vscode.commands.executeCommand(
+                            "workbench.action.openSettings",
+                            "webrogue.javaInstallationDirectory",
+                        );
+                    }
+                });
+            } else if (error.stderr && error.stderr!.includes("Android SDK not found")) {
+                vscode.window.showErrorMessage(
+                    "Webrogue CLI utility is unable to find Android SDK. You can specify path to Android SDK directory in settings.",
+                    openSettingsAnswer
+                ).then(async answer => {
+                    if (answer === openSettingsAnswer) {
+                        await vscode.commands.executeCommand(
+                            "workbench.action.openSettings",
+                            "webrogue.androidSdkDirectory",
+                        );
+                    }
+                });
+            } else {
+                vscode.window.showErrorMessage(`${error}`);
+            }
         }
     }
 }
@@ -486,7 +516,7 @@ export async function ensureCLI(
     folder: vscode.WorkspaceFolder | null | undefined
 ): Promise<CLI | null> {
     let customBinary: string | undefined = vscode.workspace.getConfiguration("webrogue", folder).get("CliUtilityPath");
-    if(!customBinary) {
+    if (!customBinary) {
         return await ensureComponent(context, CLI_DOWNLOADABLE_TYPE);
     }
     let customBinaryUri = vscode.Uri.file(customBinary);

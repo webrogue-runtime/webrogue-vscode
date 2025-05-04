@@ -55,7 +55,10 @@ const wrappEditorConfig = {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'dist'),
     filename: 'wrapp_editor.js',
-    libraryTarget: 'commonjs2'
+    library: {
+      name: "exports",
+      type: 'var'
+    }
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -72,7 +75,7 @@ const wrappEditorConfig = {
           }
         ]
       }
-    ]
+    ],
   },
   devtool: 'nosources-source-map',
   infrastructureLogging: {

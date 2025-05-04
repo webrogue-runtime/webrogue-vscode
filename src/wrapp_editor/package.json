@@ -1,5 +1,6 @@
 {
     "dependencies": {
-        "@types/vscode-webview": "^1.57.5"
+        "@types/vscode-webview": "^1.57.5",
+        "@vscode-elements/elements": "^1.15.0"
     }
 }
