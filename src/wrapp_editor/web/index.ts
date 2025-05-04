@@ -4,9 +4,6 @@ import "@vscode-elements/elements/dist/vscode-tabs/index";
 import "@vscode-elements/elements/dist/vscode-checkbox/index";
 import "@vscode-elements/elements/dist/vscode-textfield/index";
 import "@vscode-elements/elements/dist/vscode-icon/index";
-import { VscodeCheckbox } from "@vscode-elements/elements/dist/vscode-checkbox/index";
-import { VscodeButton } from '@vscode-elements/elements/dist/vscode-button/index';
-import { VscodeTextfield } from '@vscode-elements/elements/dist/vscode-textfield/index';
 import { VscodeIcon } from '@vscode-elements/elements/dist/vscode-icon';
 import * as utils from './utils';
 
