@@ -355,6 +355,19 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
                             <div id="${common.ANDROID_ERROR_ID}"></div>
                         </p>
                     </vscode-tab-panel>
+
+                    <vscode-tab-header slot="header">
+                        macOS/iOS
+                    </vscode-tab-header>
+                    <vscode-tab-panel>
+                        <p>
+                            Coming soon!
+                        </p>
+                        <p>
+                            In fact building macOS/iOS apps feature is already implemented in Webrogue, but
+                            not signing and packaging features, so this tab is currently empty.
+                        </p>
+                    </vscode-tab-panel>
                 </vscode-tabs>
 
                 <script nonce="${nonce}" src="${scriptUri}"></script>

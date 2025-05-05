@@ -70,7 +70,7 @@ Possible solutions are:
 
         let cli = await components.ensureCLI(this.context, folder);
         if (!cli) {
-            throw new Error("Webrogue CLI component is required to debug Webrogue applications");
+            throw new Error("Webrogue CLI utility is required to debug Webrogue applications");
         }
 
         return {
