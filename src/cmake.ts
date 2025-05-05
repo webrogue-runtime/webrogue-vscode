@@ -20,7 +20,7 @@ export async function checkCmakeExtension(context: vscode.ExtensionContext) {
             return;
         }
         if (!sdk_info) { return; }
-        var cmakeKitsPath = context.globalState.get<string>("cmakeKitsPath");
+        var cmakeKitsPath = undefined; // context.globalState.get<string>("cmakeKitsPath");
         if (!cmakeKitsPath) {
             let exports = await cmake_extension.activate();
             let api = exports.getApi(2);
