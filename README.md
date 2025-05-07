@@ -20,3 +20,6 @@ To clean this data, navigate to Webrogue extension's screen, click "Cache" link 
 ## Known Issues
 
 Since both Webrogue and this extensions are at early versions, a lot of features are missing.
+
+After installing Cmake extension and Webrogue SDK component, new cmake kit may not appear in kit list. 
+It can be solved by restarting VSCode.

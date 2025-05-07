@@ -9,23 +9,29 @@ export function register(context: vscode.ExtensionContext) {
         'webrogue-vscode.updateComponents',
         async () => {
             try {
+
+                let variantMap: Map<string, components.DownloadableComponentType<unknown>> = new Map();
+                let variants: string[] = [];
+                for (const component of components.ALL_DOWNLOADABLE_TYPES) {
+                    var name = component.getName();
+                    if(await components.getDownloadedComponent<unknown>(context, component)) {
+                        name += " (installed)"
+                    }
+                    variants.push(name);
+                    variantMap.set(name, component);
+                }
+                
                 let choice = await vscode.window.showQuickPick(
-                    components.ALL_DOWNLOADABLE_TYPES.map(t => t.getName()),
+                    variants,
                     {
-                        canPickMany: true,
-                        placeHolder: "Select components to install/update"
+                        canPickMany: false,
+                        placeHolder: "Select component to install/update"
                     }
                 );
                 if (!choice) {
                     return;
                 }
-                for (const component of components.ALL_DOWNLOADABLE_TYPES) {
-                    if (choice.indexOf(component.getName()) === -1) {
-                        continue;
-                    }
-                    await components.installComponent<unknown>(context, component, "command");
-                }
-                await cmake.checkCmakeExtension(context);
+                await components.installComponent<unknown>(context, variantMap.get(choice)!, "command");
             } catch (e) {
                 vscode.window.showErrorMessage(
                     `An error occurred while installing Webrogue SDK: ${e}`

@@ -82,7 +82,7 @@
           "description": "Check for component updates when extension starts.",
           "default": true
         },
-        "webrogue.CliUtilityPath": {
+        "webrogue.cliUtilityPath": {
           "scope": "machine-overridable",
           "type": "string",
           "description": "Path to custom Webrogue CLI Program."

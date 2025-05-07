@@ -7,7 +7,7 @@ import * as jszip from 'jszip';
 import * as childProcess from 'child_process';
 import * as cache from './cache';
 
-interface DownloadableComponentType<DownloadedComponent> {
+export interface DownloadableComponentType<DownloadedComponent> {
     getReleasesURL(): string
     getName(): string
     versionFile(): string
@@ -515,7 +515,7 @@ export async function ensureCLI(
     context: vscode.ExtensionContext,
     folder: vscode.WorkspaceFolder | null | undefined
 ): Promise<CLI | null> {
-    let customBinary: string | undefined = vscode.workspace.getConfiguration("webrogue", folder).get("CliUtilityPath");
+    let customBinary: string | undefined = vscode.workspace.getConfiguration("webrogue", folder).get("cliUtilityPath");
     if (!customBinary) {
         return await ensureComponent(context, CLI_DOWNLOADABLE_TYPE);
     }
