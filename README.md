@@ -1,6 +1,6 @@
 # Webrogue extension for Visual Studio Code
 
-Read about Webrogue at https://webrogue-runtime.github.io/
+Read about Webrogue at https://webrogue.dev
 
 ## Features
 
