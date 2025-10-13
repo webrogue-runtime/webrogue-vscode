@@ -3,7 +3,7 @@ import * as components from './components';
 import * as path from 'path';
 import * as cache from './cache';
 import { readdirSync, readFile, readFileSync } from 'fs';
-import { CommandID, CommandMap, CommandRequest, CommandResponse } from './wrapp_editor/common';
+import { CommandID, CommandMap, CommandRequest, CommandResponse } from './proto';
 
 interface SavedState {
     [key: string]: any
@@ -193,11 +193,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 
 
     async setHTML(webview: vscode.Webview): Promise<void> {
-        const platformScriptPath = vscode.Uri.joinPath(
-            this._context.extensionUri,
-            'dist',
-            'wrapp_editor.js'
-        ).fsPath;
+        const nonce = getNonce();
 
         const webviewAssetsDirPath = vscode.Uri.joinPath(
             this._context.extensionUri,
@@ -207,6 +203,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
         ).fsPath;
 
         const webviewScriptPath = path.join(webviewAssetsDirPath, readdirSync(webviewAssetsDirPath).filter((dirname) => dirname.endsWith(".js"))[0]);
+        const webviewScriptUrl = webview.asWebviewUri(vscode.Uri.file(webviewScriptPath));
         const webviewStylePath = path.join(webviewAssetsDirPath, readdirSync(webviewAssetsDirPath).filter((dirname) => dirname.endsWith(".css"))[0]);
         const webviewStyleUrl = webview.asWebviewUri(vscode.Uri.file(webviewStylePath));
 
@@ -227,7 +224,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 				Use a content security policy to only allow loading images from https or from our extension directory,
 				and only allow scripts that have a specific nonce.
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'unsafe-inline' 'unsafe-eval' 'http://localhost:5173/';">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'nonce-${nonce}' 'http://localhost:5173/';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -238,14 +235,9 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 			</head>
 			<body>
                 <div id="root"></div>
-                <script>
-                    eval(${JSON.stringify(new TextDecoder().decode(readFileSync(platformScriptPath)))})
-                    eval(${JSON.stringify(new TextDecoder().decode(readFileSync(webviewScriptPath)))})
-                </script>
+                <script nonce="${nonce}" src="${webviewScriptUrl}"></script>
 			</body>
 			</html>`;
-
-        // <script nonce="${nonce2}" src="${script2Uri}"></script>
     }
 
     constructor(
