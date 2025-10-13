@@ -1,60 +1,50 @@
+import { CommandID, CommandMap, CommandRequest, CommandResponse } from "../common";
 
-import { VscodeCheckbox } from "@vscode-elements/elements/dist/vscode-checkbox/index";
-import { VscodeButton } from '@vscode-elements/elements/dist/vscode-button/index';
-import { VscodeTextfield } from '@vscode-elements/elements/dist/vscode-textfield/index';
-import * as common from '../common';
+
+interface WebviewApi<StateType> {
+    postMessage(message: unknown): void;
+    getState(): StateType | undefined;
+    setState<T extends StateType | undefined>(newState: T): T;
+}
+
+declare global {
+    function acquireVsCodeApi<StateType = unknown>(): WebviewApi<StateType>;
+}
 
 const vscode = acquireVsCodeApi();
 
-export function sendCommand<Command extends common.CommandID>(id: Command, data: common.CommandMap[Command]) {
-    vscode.postMessage({
-        command: id,
-        data: data
-    });
+const handleMap: Map<number, (response: CommandResponse<CommandID>) => void> = new Map()
+let totalRequestNumber = 0;
+
+export function sendCommand<Command extends CommandID>(command: Command, data: CommandMap[Command]["request"]): Promise<CommandMap[Command]["response"]> {
+    return new Promise((resolve) => {
+        totalRequestNumber++;
+        const currentRequestId = totalRequestNumber
+        const request: CommandRequest<Command> = {
+            requestId: currentRequestId,
+            data: data,
+            command: command
+        };
+        handleMap.set(currentRequestId, (rawResponse) => {
+            const response = rawResponse as CommandResponse<Command>
+            resolve(response.data)
+            handleMap.delete(currentRequestId)
+        });
+        vscode.postMessage(request)
+    })
 }
 
-export var state = common.getEmptyState();
 
-function sendState() {
-    sendCommand("setState", state);
+
+function onMessage(data: unknown) {
+    const response = data as CommandResponse<CommandID>
+    const handler = handleMap.get(response.requestId)
+    if (handler)
+        handler(response)
 }
 
-export function findTextField(
-    elementId: string,
-    callback: (value: string) => void
-): VscodeTextfield {
-    let textfield = <VscodeTextfield>document.getElementById(elementId)!;
-    textfield.addEventListener("input", () => {
-        callback(textfield.value);
-        sendState();
+export function init() {
+    window.addEventListener('message', async e => {
+        onMessage(e.data);
     });
-    return textfield;
-}
-
-export function findCheckbox(
-    elementId: string,
-    callback: (checked: boolean) => void
-): VscodeCheckbox {
-    let checkbox = <VscodeCheckbox>document.getElementById(elementId)!;
-    checkbox.addEventListener("change", () => {
-        callback(checkbox.checked);
-        sendState();
-    });
-    return checkbox;
-}
-
-export function findButton<Command extends common.CommandID>(
-    elementId: string,
-    command: Command,
-    data: common.CommandMap[Command] | (() => common.CommandMap[Command]),
-): VscodeButton {
-    let button = <VscodeButton>document.getElementById(elementId)!;
-    button.addEventListener("click", () => {
-        if (typeof data === "function") {
-            sendCommand(command, data());
-        } else {
-            sendCommand(command, data);
-        }
-    });
-    return button;
 }

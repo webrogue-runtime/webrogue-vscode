@@ -60,6 +60,9 @@ const wrappEditorConfig = {
       type: 'var'
     }
   },
+  externals: {
+    'vscode-webview': 'vscodeWebview' // Added this line to treat vscode-webview as an external global
+  },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: ['.ts', '.js']
