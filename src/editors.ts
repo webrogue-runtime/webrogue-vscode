@@ -204,6 +204,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 
         const webviewScriptPath = path.join(webviewAssetsDirPath, readdirSync(webviewAssetsDirPath).filter((dirname) => dirname.endsWith(".js"))[0]);
         const webviewScriptUrl = webview.asWebviewUri(vscode.Uri.file(webviewScriptPath));
+
         const webviewStylePath = path.join(webviewAssetsDirPath, readdirSync(webviewAssetsDirPath).filter((dirname) => dirname.endsWith(".css"))[0]);
         const webviewStyleUrl = webview.asWebviewUri(vscode.Uri.file(webviewStylePath));
 
@@ -220,16 +221,11 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 			<head>
 				<meta charset="UTF-8">
 
-				<!--
-				Use a content security policy to only allow loading images from https or from our extension directory,
-				and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource}; script-src 'nonce-${nonce}' 'http://localhost:5173/';">
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource} data:; script-src 'nonce-${nonce}' 'http://localhost:5173/';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-                <link href="${webviewStyleUrl}" rel="stylesheet" />
-                <link href="${codiconsUri}" rel="stylesheet" id="vscode-codicon-stylesheet">
+                <link href="${webviewStyleUrl}" rel="stylesheet" id="vscode-codicon-stylesheet"/>
 
 				<title>WRAPP</title>
 			</head>
