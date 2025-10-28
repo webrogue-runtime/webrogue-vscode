@@ -221,7 +221,7 @@ export class WRAPPEditorProvider implements vscode.CustomReadonlyEditorProvider<
 			<head>
 				<meta charset="UTF-8">
 
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource} data:; script-src 'nonce-${nonce}' 'http://localhost:5173/';">
+				<meta http-equiv="Content-Security-Policy" content="default-src http:; img-src ${webview.cspSource} blob:; style-src ${webview.cspSource}; font-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
