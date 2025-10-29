@@ -1,5 +1,4 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
     "required": [
         "name",
         "id",
@@ -30,8 +29,8 @@
             ],
             "properties": {
                 "normal": {
-                    "description": "Main icon configuration",
                     "type": "object",
+                    "description": "Icon configuration",
                     "required": [
                         "path",
                         "inset",
@@ -50,7 +49,7 @@
                         },
                         "background": {
                             "type": "object",
-                            "description": "Icon's background color",
+                            "description": "RGB color specification",
                             "required": [
                                 "red",
                                 "green",
@@ -61,19 +60,19 @@
                                     "type": "number",
                                     "minimum": 0,
                                     "maximum": 1,
-                                    "description": "Red component of icon's background color"
+                                    "description": "Red component of color"
                                 },
                                 "green": {
                                     "type": "number",
                                     "minimum": 0,
                                     "maximum": 1,
-                                    "description": "Green component of icon's background color"
+                                    "description": "Green component of color"
                                 },
                                 "blue": {
                                     "type": "number",
                                     "minimum": 0,
                                     "maximum": 1,
-                                    "description": "Blue component of icon's background color"
+                                    "description": "Blue component of color"
                                 }
                             }
                         }
@@ -134,9 +133,12 @@
         "env": {
             "type": "object",
             "description": "Environment variables",
-            "additionalItems": {
+            "additionalProperties": {
                 "type": "string"
             }
         }
-    }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "WebrogueConfig",
+    "description": "Webrogue application configuration schema"
 }

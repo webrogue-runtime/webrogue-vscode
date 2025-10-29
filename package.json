@@ -155,7 +155,7 @@
     "jsonValidation": [
       {
         "fileMatch": "webrogue.json",
-        "url": "./webrogue-config-schema.json"
+        "url": "./wrapp-config.schema.json.json"
       }
     ]
   },
